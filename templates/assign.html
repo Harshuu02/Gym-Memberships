@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Assign Plan{% endblock %}
+
+{% block content %}
+<form method="post">
+  <div class="card">
+    <h2>Assign Plan</h2>
+
+    <p><strong>Member:</strong> {{ member[1] }}</p>
+
+    <label>Plan</label>
+    <select name="plan_id">
+      {% for p in plans %}
+      <option value="{{ p[0] }}">
+        {{ p[1] }} ({{ p[2] }} days)
+      </option>
+      {% endfor %}
+    </select>
+
+    <br><br>
+    <button class="btn">Assign Membership</button>
+  </div>
+</form>
+{% endblock %}

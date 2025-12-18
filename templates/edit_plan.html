@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Plan</title>
+</head>
+<body>
+    <h1>Edit Plan</h1>
+
+    <form method="post">
+        <input type="text" name="name" value="{{ plan.name }}" required><br><br>
+        <input type="number" name="duration" value="{{ plan.duration_days }}" required><br><br>
+        <input type="number" name="price" value="{{ plan.price }}" required><br><br>
+        <button type="submit">Update</button>
+    </form>
+
+    <br>
+    <a href="/plans">← Back</a>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Members{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h2>Members</h2>
+    <a href="/members/add" class="btn">+ Add Member</a>
+  </div>
+
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Plan</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+
+    {% for m in members %}
+    <tr>
+      <td>{{ m.name }}</td>
+      <td>{{ m.phone }}</td>
+      <td>{{ m.plan or "-" }}</td>
+      <td>
+        {% if m.end_date %}
+          {% if m.active %}
+            <span class="status-active">Active</span>
+          {% else %}
+            <span class="status-expired">Expired</span>
+          {% endif %}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td class="actions">
+        <a href="/assign/{{ m.id }}">Assign</a>
+        <a href="/members/delete/{{ m.id }}">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
