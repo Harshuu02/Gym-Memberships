@@ -2,18 +2,39 @@
 {% block title %}Add Member{% endblock %}
 
 {% block content %}
-<form method="post">
-  <div class="card">
-    <h2>Add Member</h2>
+<div class="auth-body">
 
-    <label>Name</label>
-    <input name="name" required>
+  <div class="auth-card">
+    <h1>Add New Member</h1>
+    <p class="subtitle">Create a gym member account</p>
 
-    <label>Phone</label>
-    <input name="phone">
+    <form method="post">
 
-    <br><br>
-    <button class="btn">Save Member</button>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" placeholder="e.g. Rahul Sharma" required>
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" name="phone" placeholder="e.g. 9876543210">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Set initial password" required>
+      </div>
+
+      <button class="btn primary" style="width:100%; margin-top:1rem;">
+        Save Member
+      </button>
+
+    </form>
+
+    <p class="note">
+      Member can login using phone + password
+    </p>
   </div>
-</form>
+
+</div>
 {% endblock %}

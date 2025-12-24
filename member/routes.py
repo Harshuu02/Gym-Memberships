@@ -3,26 +3,41 @@ from core.db import get_db
 from member import member_bp
 from datetime import date, datetime
 import sqlite3
+from core.security import verify_password
+from core.auth import member_required
+
 
 @member_bp.route("/member_login", methods=["GET", "POST"])
 def member_login():
     error = None
-
     if request.method == "POST":
+        phone = request.form["phone"]
+        password = request.form["password"]
+
         conn = get_db()
-        member = conn.execute("SELECT * FROM members WHERE phone=?",
-                              (request.form["phone"],)).fetchone()
+        member = conn.execute(
+            "SELECT * FROM members WHERE phone = ?",
+            (phone,)
+        ).fetchone()
         conn.close()
 
-        if member:
+        if not member:
+            error = "❌ Invalid credentials"
+        elif not verify_password(member["password"], password):
+            error = "❌ Invalid credentials"
+        else:
+            session.clear()
             session["member_id"] = member["id"]
             return redirect("/member_dashboard")
-        error = "Member not found"
 
-    return render_template("member/member_login.html", error=error)
-
+    # ✅ ALWAYS return something
+    return render_template(
+        "member/member_login.html",
+        error=error
+    )
 
 @member_bp.route("/member_dashboard")
+@member_required
 def member_dashboard():
     if "member_id" not in session:
         return redirect("/member_login")

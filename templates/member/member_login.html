@@ -22,6 +22,37 @@
       <input type="text" name="phone" required>
     </div>
 
+    <div class="form-group">
+      <label>Password</label>
+
+      <div style="position: relative;">
+            <input
+              type="password"
+              name="password"
+              id="passwordInput"
+              required
+              style="padding-right: 3rem;"
+            >
+
+            <span
+              onclick="togglePassword()"
+              style="
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                font-size: 0.85rem;
+                color: #4f46e5;
+                user-select: none;
+              "
+            >
+              Show
+            </span>
+      </div>
+    </div>
+
+
     <button class="btn primary" style="width:100%">Login</button>
   </form>
 
@@ -29,4 +60,17 @@
 </div>
 
 </body>
+<script>
+  function togglePassword() {
+    const input = document.getElementById("passwordInput");
+    if (input.type === "password") {
+      input.type = "text";
+      event.target.innerText = "Hide";
+    } else {
+      input.type = "password";
+      event.target.innerText = "Show";
+    }
+  }
+</script>
+
 </html>

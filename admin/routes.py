@@ -3,6 +3,8 @@ from datetime import date, timedelta
 from core.db import get_db
 from core.auth import admin_required
 from admin import admin_bp
+from core.security import hash_password
+from core.reminders import get_expiring_members
 
 
 @admin_bp.route("/admin_login", methods=["GET", "POST"])
@@ -20,6 +22,7 @@ def admin_login():
 @admin_required
 def dashboard():
     conn = get_db()
+    expiring = get_expiring_members(conn)
 
     today = date.today().isoformat()
     soon_date = (date.today() + timedelta(days=7)).isoformat()
@@ -53,43 +56,92 @@ def dashboard():
     ).fetchone()[0]
 
     conn.close()  # ✅ CLOSE AT THE VERY END
+    for m in expiring:
+        print(
+            f"[REMINDER] {m['name']} ({m['phone']}): "
+            f"membership expires in {m['days_left']} days"
+        )
 
     return render_template(
         "admin/dashboard.html",
         total_members=total_members,
         active_memberships=active_memberships,
         expired_memberships=expired_memberships,
-        expiring_soon=expiring_soon
+        expiring_soon=expiring_soon,
+        expiring=expiring
     )
 
 @admin_bp.route("/members")
 @admin_required
 def members():
     conn = get_db()
-    today = date.today().isoformat()
+    today = date.today()
+    today_str = today.isoformat()
+    soon_str = (today + timedelta(days=7)).isoformat()
 
-    rows = conn.execute("""
-        SELECT m.id, m.name, m.phone, p.name, ms.end_date
+    query = request.args.get("q", "").strip()
+    status = request.args.get("status", "")
+
+    sql = """
+        SELECT 
+            m.id,
+            m.name,
+            m.phone,
+            p.name AS plan,
+            ms.end_date
         FROM members m
         LEFT JOIN memberships ms ON m.id = ms.member_id
         LEFT JOIN plans p ON ms.plan_id = p.id
-        ORDER BY m.id DESC
-    """).fetchall()
+        WHERE 1=1
+    """
+    params = []
 
+    if query:
+        sql += " AND (m.name LIKE ? OR m.phone LIKE ?)"
+        params.extend([f"%{query}%", f"%{query}%"])
+
+    if status == "active":
+        sql += " AND ms.end_date >= ?"
+        params.append(today_str)
+
+    elif status == "expired":
+        sql += " AND ms.end_date < ?"
+        params.append(today_str)
+
+    elif status == "expiring":
+        sql += " AND ms.end_date BETWEEN ? AND ?"
+        params.extend([today_str, soon_str])
+
+    sql += " ORDER BY m.id DESC"
+
+    rows = conn.execute(sql, params).fetchall()
     conn.close()
 
     members = []
     for r in rows:
+        is_active = r["end_date"] and r["end_date"] >= today_str
+        is_expiring = (
+                r["end_date"]
+                and today_str <= r["end_date"] <= soon_str
+        )
+
         members.append({
-            "id": r[0],
-            "name": r[1],
-            "phone": r[2],
-            "plan": r[3],
-            "end_date": r[4],
-            "active": r[4] and r[4] >= today
+            "id": r["id"],
+            "name": r["name"],
+            "phone": r["phone"],
+            "plan": r["plan"],
+            "end_date": r["end_date"],
+            "active": is_active,
+            "expiring": is_expiring
         })
 
-    return render_template("admin/members.html", members=members, today=today)
+    return render_template(
+        "admin/members.html",
+        members=members,
+        query=query,
+        status=status
+    )
+
 
 
 @admin_bp.route("/members/add", methods=["GET", "POST"])
@@ -97,13 +149,20 @@ def members():
 def add_member():
     if request.method == "POST":
         conn = get_db()
-        conn.execute("INSERT INTO members (name, phone) VALUES (?, ?)",
-                     (request.form["name"], request.form["phone"]))
+        conn.execute(
+            "INSERT INTO members (name, phone, password) VALUES (?, ?, ?)",
+            (
+                request.form["name"],
+                request.form["phone"],
+                hash_password(request.form["password"])
+            )
+        )
         conn.commit()
         conn.close()
         return redirect("/members")
 
     return render_template("admin/add_member.html")
+
 
 
 @admin_bp.route("/members/delete/<int:member_id>")

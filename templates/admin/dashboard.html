@@ -22,6 +22,20 @@
             <h3>Expiring Soon</h3>
             <p class="stat">{{ expiring_soon }}</p>
       </div>
+    {% if expiring %}
+    <div class="card" style="margin-top:2rem;">
+      <h3>⚠ Expiring Soon (Next 7 Days)</h3>
+
+      <ul>
+        {% for m in expiring %}
+          <li>
+            {{ m.name }} — {{ m.days_left }} days left
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
 
 </div>
 {% endblock %}

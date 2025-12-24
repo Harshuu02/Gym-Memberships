@@ -19,9 +19,9 @@ def landing():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/")
+    return redirect("/landing")
 
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)

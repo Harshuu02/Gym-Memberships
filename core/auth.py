@@ -8,3 +8,11 @@ def admin_required(f):
             return redirect("/admin_login")
         return f(*args, **kwargs)
     return decorated
+
+def member_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("member_id"):
+            return redirect("/member_login")
+        return f(*args, **kwargs)
+    return decorated

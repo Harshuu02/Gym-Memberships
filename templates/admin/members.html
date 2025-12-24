@@ -5,9 +5,41 @@
 <div class="table-wrapper">
 
   <div class="page-header">
-    <h2>Members</h2>
+    <h2 class="page-title">Members</h2>
     <a href="/members/add" class="btn primary">+ Add Member</a>
   </div>
+
+    <form method="get" class="search-bar">
+      <input
+            type="text"
+            name="q"
+            placeholder="Search by name or phone"
+            value="{{ query }}"
+      />
+      <button class="btn primary" type="submit">Search</button>
+
+          {% if query %}
+            <a href="/members" class="btn secondary">Clear</a>
+          {% endif %}
+    </form>
+    <div class="filter-bar">
+          <a href="/members" class="btn {% if not status %}primary{% endif %}">All</a>
+
+          <a href="/members?status=active{% if query %}&q={{ query }}{% endif %}"
+             class="btn {% if status == 'active' %}primary{% endif %}">
+             Active
+          </a>
+
+          <a href="/members?status=expired{% if query %}&q={{ query }}{% endif %}"
+             class="btn {% if status == 'expired' %}primary{% endif %}">
+             Expired
+          </a>
+
+          <a href="/members?status=expiring{% if query %}&q={{ query }}{% endif %}"
+             class="btn warning {% if status == 'expiring' %}primary{% endif %}">
+             Expiring Soon
+          </a>
+    </div>
 
   <table>
     <tr>
@@ -19,7 +51,10 @@
     </tr>
 
     {% for m in members %}
-    <tr>
+    <tr class="
+      {% if m.expiring %}row-expiring
+      {% elif not m.active %}row-expired
+      {% endif %}">
       <td>{{ m.name }}</td>
       <td>{{ m.phone }}</td>
       <td>{{ m.plan or "-" }}</td>
@@ -27,17 +62,23 @@
         {% if m.active %}
           <span class="badge active">Active</span>
         {% else %}
-          <span class="badge expired">Expired</span>
+          <span class="mini-badge expired">⚠ Expired</span>
         {% endif %}
       </td>
-      <td class="actions">
-        <a href="/members/{{ m.id }}">View</a>
-        <a href="/assign/{{ m.id }}">Assign</a>
-        <a href="/members/delete/{{ m.id }}" class="danger">Delete</a>
+      <<td class="actions">
+          <a href="/members/{{ m.id }}" class="btn secondary">View</a>
+          <a href="/assign/{{ m.id }}" class="btn primary">Renew</a>
+          <a href="/members/delete/{{ m.id }}" class="danger">Delete</a>
       </td>
     </tr>
     {% endfor %}
-
   </table>
+    {% if members|length == 0 %}
+      <div class="empty-state">
+        <p>😕 No members found</p>
+        <span>Try changing filters or search keywords</span>
+      </div>
+    {% endif %}
+
 </div>
 {% endblock %}

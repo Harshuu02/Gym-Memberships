@@ -5,6 +5,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>{% block title %}Admin Panel{% endblock %}</title>
       <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -16,8 +17,7 @@
             <a href="/dashboard">Dashboard</a>
             <a href="/members">Members</a>
             <a href="/plans">Plans</a>
-            <a href="/expiring" class="btn warning">View Expiring Members</a>
-            <a href="/logout" class="danger">Logout</a>
+            <a href="/logout" class="btn danger">Logout</a>
       </nav>
 </header>
 
